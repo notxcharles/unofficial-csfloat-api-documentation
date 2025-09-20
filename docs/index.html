@@ -1,17 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CSFloat API Documentation</title>
-  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@latest/swagger-ui-bundle.css" />
+  <meta charset="UTF-8">
+  <title>Unofficial CSFloat API Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://unpkg.com/swagger-ui-dist@latest/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
   <script>
-    SwaggerUIBundle({
-      url: './csfloat-api.yaml', // Your spec file
-      dom_id: '#swagger-ui',
-    });
+    window.onload = () => {
+      const ui = SwaggerUIBundle({
+        url: "csfloat-api.yaml",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout"
+      });
+      window.ui = ui;
+    };
   </script>
 </body>
 </html>
