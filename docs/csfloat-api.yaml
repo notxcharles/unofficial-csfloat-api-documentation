@@ -2,7 +2,7 @@ openapi: 3.0.4
 info:
   title: Unofficial CSFloat.com API
   description: |-
-    This is an unofficial attempt at documenting the CSFloat REST API.
+    This is an unofficial attempt at documenting the CSFloat REST API (incomplete).
 
     [Official CSFloat Documentation](https://docs.csfloat.com/#introduction)
   license:
@@ -24,17 +24,17 @@ security:
 paths:
   /transactions:
     get:
-      description: Returns a list of transactions made 
+      description: Returns a list of transactions made. Each page can contain at most 100 records
       parameters:
         - name: page
           in: query
-          description: Limits the number of items on a page
+          description: Page number to query
           schema:
             type: integer
             minimum: 0
         - name: limit
           in: query
-          description: Limits the number of items on a page
+          description: Number of items on the page
           schema:
             type: integer
             minimum: 1
