@@ -1,0 +1,108 @@
+openapi: 3.0.4
+info:
+  title: Unofficial CSFloat.com API
+  description: |-
+    This is an unofficial attempt at documenting the CSFloat REST API.
+
+    [Official CSFloat Documentation](https://docs.csfloat.com/#introduction)
+  license:
+    name: MIT License
+    url: https://choosealicense.com/licenses/mit/
+  version: v0.1
+servers:
+  - url: https://csfloat.com/api/v1/me
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+security:
+  - ApiKeyAuth: []
+
+paths:
+  /transactions:
+    get:
+      description: Returns a list of transactions made 
+      parameters:
+        - name: page
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: integer
+            minimum: 0
+        - name: limit
+          in: query
+          description: Limits the number of items on a page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: order
+          in: query
+          description: Order items by time created
+          schema:
+            type: string
+            enum: [desc, asc]
+
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: transaction id
+                    created_at:
+                      type: string
+                      description: time order was created at
+                    user_id:
+                      type: string
+                      description: user's steam id
+                    type:
+                      type: string
+                      description: type of transaction
+                    details:
+                      type: object
+                      description: details of the transaction
+                      properties:
+                        contract_id:
+                          type: string
+                          description: id of the contract_id
+                        trade_id:
+                          type: string
+                          description: id of the trade_id
+                        type:
+                          type: string
+                          description: could only find examples where this was "buyer_ping"
+                    balance_offset:
+                      type: integer
+                      description: balance change (usd)
+                    pending_offset:
+                      type: integer
+                      description: any pending balance change, this is usually from sales (usd)
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:   
+                  message:
+                    type: string
+        '401':
+          description: Invalid API Key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Invalid API key
