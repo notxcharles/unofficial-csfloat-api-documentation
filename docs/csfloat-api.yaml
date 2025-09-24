@@ -284,8 +284,8 @@ components:
           description: Steam trade offer id
         state:
           type: integer
-          description: Not sure what this represents
-          enum: [3] # TODO: Check all values, I can't find a trade thats not marked as 3
+          description: State = 3 seems to be default. State was 6 when trade was refunded. Could be more values
+          enum: [3, 6]
         is_from_seller:
           type: boolean
         can_cancel_at:
@@ -314,8 +314,8 @@ components:
           description: Datetime that the contract was created
         type:
           type: string
-          enum: ["buy_now"] # TODO find other types, this might change if selling an item?
-          description: the type of transaction
+          enum: [buy now, refunded, listed, delisted]
+          description: the type of contract. There may be other types
         price:
           type: number
           description: price, in usd cents
@@ -415,7 +415,7 @@ components:
           type: boolean
         type:
           type: string
-          description: type of asset
+          description: Type of asset
           enum: [skin, sticker, container] # TODO: are there any more types?
           example: "skin"
         rarity_name:
