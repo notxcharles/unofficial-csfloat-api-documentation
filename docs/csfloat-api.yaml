@@ -393,7 +393,7 @@ components:
           description: 1. Consumer grade, 2. Industrial Grade, 3. Mil spec, 4. Restricted, 5. Classified, 6. Covert
         quality:
           type: integer
-          description: #what does this represent?
+          description: Not sure what this represents. Quality was 3 when trading knives, 4 when trading trade up skins
         market_hash_name:
           type: string
           description: Name of the skin
