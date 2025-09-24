@@ -190,10 +190,11 @@ components:
           example: "2025-09-18T14:45:20.638317Z"
         state:
           type: string
-          enum: [pending, verified, queued] # TODO: Check all values. Got the 'queued' when a trade was not yet sent (just purchased an item)
+          enum: [pending, verified, queued, failed, cancelled]
+          description: Represents the state of the trade. 'Queued' when trade was not yet sent (eg just after purchasing) #TODO
         verification_mode:
           type: string
-          enum: [escrow, inventory] # TODO: Check all values. Got the 'inventory' when a trade was not yet sent (just purchased) 
+          enum: [escrow, inventory]
         steam_offer:
           oneOf:
             - $ref: "#/components/schemas/SteamOfferFull"
@@ -203,8 +204,8 @@ components:
           format: date-time
         inventory_check_status:
           type: integer
-          enum: [1, 2]
-          description: Unsure what this represents # TODO try to find differences when this is 1 vs 2
+          enum: [1, 2, 3]
+          description: Unsure what this represents 
         trade_protection_ends_at:
           type: string
           format: date-time
