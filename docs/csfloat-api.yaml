@@ -415,7 +415,7 @@ components:
         type:
           type: string
           description: type of asset
-          enum: [skin] # TODO: get all types
+          enum: [skin, sticker, container] # TODO: are there any more types?
           example: "skin"
         rarity_name:
           type: string
