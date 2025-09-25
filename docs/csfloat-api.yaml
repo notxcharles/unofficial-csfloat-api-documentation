@@ -12,12 +12,6 @@ info:
 servers:
   - url: https://csfloat.com/api/v1/me
 
-components:
-  securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
 security:
   - ApiKeyAuth: []
 
@@ -47,7 +41,7 @@ paths:
             enum: [desc, asc]
 
       responses:
-        '200':
+        "200":
           description: List of transactions
           content:
             application/json:
@@ -87,16 +81,16 @@ paths:
                     pending_offset:
                       type: integer
                       description: any pending balance change, this is usually from sales (usd)
-        '400':
+        "400":
           description: Invalid request
           content:
             application/json:
               schema:
                 type: object
-                properties:   
+                properties:
                   message:
                     type: string
-        '401':
+        "401":
           description: Invalid API Key
           content:
             application/json:
@@ -106,3 +100,369 @@ paths:
                   message:
                     type: string
                     description: Invalid API key
+
+  /trades:
+    get:
+      description: Returns a list of trades with buyer, seller, contract and item details. Each page can contain at most 100 records
+      parameters:
+        - name: page
+          in: query
+          description: Page number to query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 0
+        - name: limit
+          in: query
+          description: Number of items on each page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            example: 100
+        - name: order
+          in: query
+          description: Order items by time created
+          required: false
+          schema:
+            type: string
+            enum: [desc, asc]
+
+      responses:
+        "200":
+          description: Returns a list of trades with buyer, seller, contract, and item details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradesResponse"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    TradesResponse:
+      type: object
+      properties:
+        trades:
+          type: array
+          items:
+            $ref: "#/components/schemas/Trade"
+        count:
+          type: integer
+          example: 937
+
+    Trade:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Trade id
+          example: "888795826602772312"
+        created_at:
+          type: string
+          format: date-time
+          description: Datetime that the trade was sent
+          example: "2025-09-18T14:37:18.090058Z"
+        buyer_id:
+          type: string
+          description: buyer's steam64id
+          example: "76561197960287930"
+        buyer:
+          $ref: "#/components/schemas/User"
+        seller_id:
+          type: string
+          description: seller's steam64id
+          example: "76561197960287930"
+        seller:
+          $ref: "#/components/schemas/User"
+        contract_id:
+          type: string
+          description: trade's contract_id. Seems to match the one generated in /transactions
+          example: "888436313764790436"
+        accepted_at:
+          type: string
+          format: date-time
+          description: Datetime that the trade was marked as accepted
+          example: "2025-09-18T14:45:20.638317Z"
+        state:
+          type: string
+          enum: [pending, verified, queued, failed, cancelled]
+          description: Represents the state of the trade. 'Queued' when trade was not yet sent (eg just after purchasing) #TODO
+        verification_mode:
+          type: string
+          enum: [escrow, inventory]
+        steam_offer:
+          oneOf:
+            - $ref: "#/components/schemas/SteamOfferFull"
+            - $ref: "#/components/schemas/SteamOfferMinimal"
+        verify_sale_at:
+          type: string
+          format: date-time
+        inventory_check_status:
+          type: integer
+          enum: [1, 2, 3]
+          description: Unsure what this represents 
+        trade_protection_ends_at:
+          type: string
+          format: date-time
+          description: 7-ish days after the trade offer was accepted. Before this time the trade can be reversed on steam
+        contract:
+          $ref: "#/components/schemas/Contract"
+        trade_url:
+          type: string
+          format: uri
+          description: Buyer's trade offer link
+          example: https://steamcommunity.com/tradeoffer/new/?partner=366939&token=HfhVbjq
+        trade_token:
+          type: string
+          description: Buyer's trade offer token
+          example: HfhVbjq
+        wait_for_cancel_ping:
+          type: boolean
+        is_settlement_period:
+          type: boolean
+
+    User:
+      type: object
+      properties:
+        avatar:
+          type: string
+          format: uri
+          description: uri link to steam avatar
+          example: https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_medium.jpg
+        away:
+          type: boolean
+        flags:
+          type: integer
+        online:
+          type: boolean
+        stall_public:
+          type: boolean
+        statistics:
+          $ref: "#/components/schemas/UserStatistics"
+        steam_id:
+          type: string
+          description: steam64id
+          example: "76561197960287930"
+        username:
+          type: string
+          description: steam username at the time of the transaction
+          example: Rabscuttle
+
+    UserStatistics:
+      type: object
+      properties:
+        median_trade_time:
+          type: integer
+          example: 50
+        total_avoided_trades:
+          type: integer
+          example: 0
+        total_failed_trades:
+          type: integer
+          example: 1
+        total_trades:
+          type: integer
+          example: 472
+        total_verified_trades:
+          type: integer
+          example: 473
+
+    SteamOfferMinimal:
+      type: object
+      required: [is_from_seller]
+      description: Minimal response if steam offer is not sent
+      properties:
+        is_from_seller:
+          type: boolean
+
+    SteamOfferFull:
+      type: object
+      required: [id, state, is_from_seller, can_cancel_at, sent_at, deadline_at, updated_at]
+      properties:
+        id:
+          type: string
+          description: Steam trade offer id
+          example: https://steamcommunity.com/tradeoffer/new/?partner=366939&token=HfhVbjq
+        state:
+          type: integer
+          description: State = 3 seems to be default. State was 6 when trade was refunded. Could be more values
+          enum: [3, 6]
+        is_from_seller:
+          type: boolean
+        can_cancel_at:
+          type: string
+          format: date-time
+        sent_at:
+          type: string
+          format: date-time
+        deadline_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Contract id
+          example: "888770737610031370"
+        created_at:
+          type: string
+          format: date-time
+          description: Datetime that the contract was created
+        type:
+          type: string
+          enum: [buy now, refunded, listed, delisted]
+          description: the type of contract. There may be other types
+        price:
+          type: number
+          description: price, in usd cents
+        state:
+          type: string
+          enum: [sold] # TODO find other types, this might change if selling an item?
+          description: the state of the contract
+        seller:
+          $ref: "#/components/schemas/User"
+        reference:
+          $ref: "#/components/schemas/Reference"
+        item:
+          $ref: "#/components/schemas/Item"
+        is_seller:
+          type: boolean
+          description: true if you are the seller
+        is_watchlisted:
+          type: boolean
+          description: true if you added the item to your watchlist
+        watchers:
+          type: integer
+          description: the number of people watching the item
+        sold_at:
+          type: string
+          format: date-time
+
+    Reference:
+      type: object
+      description: This might be CSFloat's price estimate
+      properties:
+        base_price:
+          type: number
+          description: In usd cents
+          example: 725
+        float_factor:
+          type: number
+          example: 1.0388128
+        predicted_price:
+          type: number
+          description: seems to be derived from base_price * float_factor
+          example: 753
+        quantity:
+          type: integer
+        last_updated:
+          type: string
+          format: date-time
+          example: "2025-01-09T09:39:37.926405Z"
+
+    Item:
+      type: object
+      properties:
+        asset_id:
+          type: string  
+          description: Unique value tied to the skin
+          example: "36542580974"
+        def_index:
+          type: integer
+          description: unique numeric identifier for a specific weapon or item in the game, 7 = WEAPON_AK47
+          example: 505
+        paint_index:
+          type: integer
+          description: the paint index is similar to the def index, except it is a unique numeric identifier for each skin in the game
+          example: 409
+        paint_seed:
+          type: integer
+          description: 1-1000
+          example: 210
+        float_value:
+          type: number
+          format: float
+          description: Skin's float value
+          example: 011442461051046848
+        icon_url:
+          type: string
+          example: -9a81dlWLwJ2UUGVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpovbSsLQJf1f_BYQJD4uOinYeOhcj7IbrfkW5u5Mx2gv2P8dig2Fbj_0FoY276cYLDIwFoNwnYqwXolOfqh5O96ZSayHs2sikh42GdwUIG-EHKEw
+        d_param:
+          type: string
+          description: part of the inspect_link
+          example: "14900349072597021737"
+        is_stattrak:
+          type: boolean
+        is_souvenir:
+          type: boolean
+        rarity:
+          type: integer
+          enum: [1, 2, 3, 4, 5, 6] 
+          description: 1. Consumer grade, 2. Industrial Grade, 3. Mil spec, 4. Restricted, 5. Classified, 6. Covert
+          example: 6
+        quality:
+          type: integer
+          description: Not sure what this represents. Quality was 3 when trading knives, 4 when trading trade up skins
+          example: 3
+        market_hash_name:
+          type: string
+          description: Name of the skin
+          example: ★ Flip Knife | Tiger Tooth (Factory New)
+        tradable:
+          type: integer
+        inspect_link:
+          type: string
+          description: Inspect link for the item
+          example: steam://rungame/730/76561202255233023/+csgo_econ_action_preview%200018F9032099032806300338A9F2EDE10340D20157571AFA
+        cs2_screenshot_id:
+          type: string
+          example: "6362683737166469504"
+        cs2_screenshot_at:
+          type: string
+          format: date-time
+          description: Datetime for when the screenshot was taken
+          example: "2024-12-29T22:32:05.929606Z"
+        is_commodity:
+          type: boolean
+        type:
+          type: string
+          description: Type of asset
+          enum: [skin, sticker, container] # TODO: are there any more types?
+          example: "skin"
+        rarity_name:
+          type: string
+          example: Covert
+        type_name:
+          type: string
+          example: Skin
+        item_name:
+          type: string
+          example: ★ Flip Knife | Tiger Tooth
+        wear_name:
+          type: string
+          example: Factory New
+        description:
+          type: string
+          example: It has been anodized orange and hand-etched in a tiger stripe pattern.\\n\\n<i>Like the tiger it is rare... like the tiger it is deadly...</i>
+        collection:
+          type: string
+          description: The collection that the skin belongs to
+          required: False
+          example: The 2021 Mirage Collection
+        serialized_inspect:
+          type: string
+          example: steam://rungame/730/76561202255233023/+csgo_econ_action_preview%2000180420DF08280630043885D1DDF003404ADFF9FF80
+        gs_sig:
+          type: string
+          example: fe66b6001261ac325b0f
