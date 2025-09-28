@@ -81,15 +81,6 @@ paths:
                     pending_offset:
                       type: integer
                       description: any pending balance change, this is usually from sales (usd)
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
         "401":
           description: Invalid API Key
           content:
@@ -100,6 +91,7 @@ paths:
                   message:
                     type: string
                     description: Invalid API key
+                    example: invalid api key
 
   /trades:
     get:
@@ -137,6 +129,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/TradesResponse"
+
+  /auto-bids:
+    get:
+      description:
+      
+      responses:
+        "200":
+          description: Returns a list of items that the user is autobidding one
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AutoBid"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "401":
+          description: Invalid API Key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Invalid API key
+
+
 
 components:
   securitySchemes:
@@ -466,3 +491,24 @@ components:
         gs_sig:
           type: string
           example: fe66b6001261ac325b0f
+    
+    AutoBid:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the auto-bid
+          example: "892386539210933050"
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the auto-bid was created
+          example: "2025-09-28T12:25:30.688119Z"
+        max_price:
+          type: integer
+          description: Maximum price the buyer is willing to pay,  usd in cents
+          example: 483
+        contract_id:
+          type: string
+          description: Identifier of the contract the auto-bid applies to
+          example: "892367906451621968"
