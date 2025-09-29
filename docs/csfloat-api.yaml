@@ -161,6 +161,49 @@ paths:
                     type: string
                     description: Invalid API key
 
+  /offers:
+    get:
+      summary: Get marketplace offers
+      description: Returns a list of offers.
+      parameters:
+        - name: page
+          in: query
+          description: Page number to query (starting from 0)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 0
+            example: 2
+        - name: limit
+          in: query
+          description: Number of results per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            example: 50
+
+      responses:
+        "200":
+          description: Paginated offers response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfferListResponse"
+
+        "401":
+          description: Invalid API Key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Invalid API key
+
 
 
 components:
@@ -512,3 +555,60 @@ components:
           type: string
           description: Identifier of the contract the auto-bid applies to
           example: "892367906451621968"
+
+    OfferListResponse:
+      type: object
+      properties:
+        offers:
+          type: array
+          description: List of offers
+          items:
+            $ref: "#/components/schemas/Offer"
+        count:
+          type: integer
+          description: Total number of offers available
+          example: 54
+
+    Offer:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique id of the offer
+          example: "797145414422889157"
+        created_at:
+          type: string
+          format: date-time
+          description: Datetime the offer was created
+          example: "2025-01-08T16:51:17.044635Z"
+        expires_at:
+          type: string
+          format: date-time
+          description: Datetime when the offer expires
+          example: "2025-01-09T16:51:17.044323Z"
+        contract_id:
+          type: string
+          description: The contract id linked to the offer
+          example: "796854333282059159"
+        contract_price:
+          type: integer
+          description: Price from the contract, usd cents
+          example: 3132
+        price:
+          type: integer
+          description: The actual offer price, usd cents
+          example: 3070
+        type:
+          type: string
+          description: Type of the offer
+          enum: [buyer_offer] # can't find any others
+          example: buyer_offer
+        state:
+          type: string
+          description: Current state of the offer
+          enum: [accepted, declined, canceled, expired]
+          example: accepted
+        buyer:
+          $ref: "#/components/schemas/User"
+        contract:
+          $ref: "#/components/schemas/Contract"
