@@ -136,7 +136,7 @@ paths:
       
       responses:
         "200":
-          description: Returns a list of items that the user is autobidding one
+          description: Returns a list of items that the user is autobidding on
           content:
             application/json:
               schema:
@@ -506,7 +506,7 @@ components:
           example: "2025-09-28T12:25:30.688119Z"
         max_price:
           type: integer
-          description: Maximum price the buyer is willing to pay,  usd in cents
+          description: Maximum price the buyer is willing to pay, usd in cents
           example: 483
         contract_id:
           type: string
